@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"os"
 )
 
 func main() {
@@ -9,5 +11,5 @@ func main() {
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("tex2png")
 	})
-	app.Listen(":3000")
+	app.Listen(fmt.Sprintf(":%s", os.Getenv("T2P_PORT")))
 }
