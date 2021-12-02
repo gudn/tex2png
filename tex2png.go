@@ -9,12 +9,18 @@ import (
 	"os/exec"
 	"path"
 	"text/template"
+	"regexp"
 )
 
 var templates *template.Template
+var inputRegexp *regexp.Regexp
 
 type TemplateArgs struct {
 	Body string
+}
+
+func testInput(texCode *bytes.Buffer) bool {
+	return inputRegexp.Find(texCode.Bytes()) == nil
 }
 
 func tex2png(texCode *bytes.Buffer) (string, error) {
@@ -24,7 +30,7 @@ func tex2png(texCode *bytes.Buffer) (string, error) {
 	}
 	srcFn := path.Join(tmpDir, "source.tex")
 	os.WriteFile(srcFn, texCode.Bytes(), 0o664)
-	cmd := exec.Command("pdflatex", "-halt-on-error", srcFn)
+	cmd := exec.Command("pdflatex", "-halt-on-error", "-no-shell-escape", srcFn)
 	cmd.Dir = tmpDir
 	err = cmd.Run()
 	if err != nil {
@@ -44,8 +50,13 @@ func tex2png(texCode *bytes.Buffer) (string, error) {
 
 func handler(c *fiber.Ctx) error {
 	args := TemplateArgs{string(c.Body())}
+	inputRegexp = regexp.MustCompile("\\\\(input|include|openin|openout)")
 	rendered := &bytes.Buffer{}
 	if err := templates.ExecuteTemplate(rendered, "tex", args); err == nil {
+		if !testInput(rendered) {
+			c.SendString("Illegal input")
+			return c.SendStatus(400)
+		}
 		png, err := tex2png(rendered)
 		if err != nil {
 			log.Printf("rendering error: %v", err)
