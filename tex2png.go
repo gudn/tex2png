@@ -6,10 +6,17 @@ import (
 	"os"
 )
 
+type TemplateArgs struct {
+  body string
+}
+
+func handler(c *fiber.Ctx) error {
+	args := TemplateArgs {string(c.Body())}
+	return c.SendString(fmt.Sprint(args))
+}
+
 func main() {
 	app := fiber.New()
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("tex2png")
-	})
+	app.Post("/", handler)
 	app.Listen(fmt.Sprintf(":%s", os.Getenv("T2P_PORT")))
 }
