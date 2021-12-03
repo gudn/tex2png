@@ -60,7 +60,8 @@ func handler(c *fiber.Ctx) error {
 		png, err := tex2png(rendered)
 		if err != nil {
 			log.Printf("rendering error: %v", err)
-			return c.SendStatus(500)
+			c.SendString(fmt.Sprintf("rendering error: %v", err))
+			return c.SendStatus(406)
 		}
 		defer os.RemoveAll(path.Dir(png))
 		return c.SendFile(png)
