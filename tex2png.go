@@ -7,9 +7,11 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path"
-	"text/template"
 	"regexp"
+	"syscall"
+	"text/template"
 )
 
 var templates *template.Template
@@ -79,5 +81,15 @@ func main() {
 	}
 	app := fiber.New()
 	app.Post("/", handler)
-	app.Listen(fmt.Sprintf(":%s", os.Getenv("T2P_PORT")))
+	go func() {
+		if err := app.Listen(fmt.Sprintf(":%s", os.Getenv("T2P_PORT"))); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	_ = <-c
+	_ = app.Shutdown()
 }
