@@ -14,6 +14,15 @@
 \usepackage{multicol}
 \usepackage{ulem}
 
+\newcommand{\rarr}{\rightarrow}
+\newcommand{\larr}{\leftarrow}
+\newcommand{\uarr}{\uparrow}
+\newcommand{\darr}{\downarrow}
+\newcommand{\rArr}{\Rightarrow}
+\newcommand{\lArr}{\Leftarrow}
+\newcommand{\uArr}{\Uparrow}
+\newcommand{\dArr}{\Downarrow}
+
 \begin{document}
 {{.Body}}
 \end{document}
